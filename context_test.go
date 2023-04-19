@@ -11,8 +11,7 @@ import (
 )
 
 func TestNewContextWithCancelInterrupt(t *testing.T) {
-	timeout := 2 * time.Second
-	ctx, cancel := utils.NewContextWithCancel(timeout, nil)
+	ctx, cancel := utils.NewContextWithCancel(nil)
 	defer cancel()
 
 	go func() {
@@ -33,25 +32,15 @@ func TestNewContextWithCancelInterrupt(t *testing.T) {
 	}
 }
 
-func TestNewContextWithCancelTimeout(t *testing.T) {
-	timeout := 500 * time.Millisecond
-	ctx, cancel := utils.NewContextWithCancel(timeout, nil)
-	defer cancel()
-
-	select {
-	case <-ctx.Done():
-		if ctx.Err() != context.DeadlineExceeded {
-			t.Errorf("Expected context to be canceled due to timeout, got: %v", ctx.Err())
-		}
-	case <-time.After(1 * time.Second):
-		t.Error("Expected the context to be canceled due to timeout, but it was not")
-	}
-}
-
 func TestNewContextWithCancelNoInterruption(t *testing.T) {
-	timeout := 1 * time.Second
-	ctx, cancel := utils.NewContextWithCancel(timeout, nil)
+	ctx, cancel := utils.NewContextWithCancel(nil)
 	defer cancel()
+
+	// cancel the context after 1 second
+	go func() {
+		time.Sleep(1 * time.Second)
+		cancel()
+	}()
 
 	select {
 	case <-ctx.Done():

@@ -5,16 +5,15 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 )
 
-// NewContextWithCancel returns a new context with a timeout and a cancel function.
-// The context will be canceled when the timeout is reached or when an interrupt signal is received.
-func NewContextWithCancel(timeout time.Duration, log interface {
+// NewContextWithCancel returns a new context with a cancel function.
+// The context will be canceled when an interrupt signal is received.
+func NewContextWithCancel(log interface {
 	Printf(format string, v ...interface{})
 },
 ) (context.Context, context.CancelFunc) {
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithCancel(context.Background())
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
