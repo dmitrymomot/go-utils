@@ -18,7 +18,9 @@ func TestNewContextWithCancelInterrupt(t *testing.T) {
 	go func() {
 		time.Sleep(500 * time.Millisecond)
 		p, _ := os.FindProcess(os.Getpid())
-		p.Signal(syscall.SIGINT)
+		if err := p.Signal(syscall.SIGINT); err != nil {
+			t.Errorf("Failed to send an interrupt signal to the process: %v", err)
+		}
 	}()
 
 	select {
